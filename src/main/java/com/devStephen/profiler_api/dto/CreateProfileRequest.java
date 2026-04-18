@@ -1,15 +1,14 @@
 package com.devStephen.profiler_api.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Builder
+
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class CreateProfileRequest {
+
+    @NotBlank(message = "Name is required")
+    private String name;
 
 
 }
