@@ -1,7 +1,140 @@
 package com.devStephen.profiler_api.services;
 
+import com.devStephen.profiler_api.client.ExternalClientCall;
+import com.devStephen.profiler_api.dto.ProfileResponse;
+import com.devStephen.profiler_api.dto.ProfileSummary;
+import com.devStephen.profiler_api.exceptions.BadRequestException;
+import com.devStephen.profiler_api.exceptions.UnprocessableException;
+import com.devStephen.profiler_api.model.Profile;
+import com.devStephen.profiler_api.repository.ProfileRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class ProfileService {
+
+    private final ExternalClientCall clientCall;
+    private final ProfileRepo profileRepo;
+
+    public Map<String, Object> createProfile(String name) {
+
+
+        if (name == null || name.trim().isEmpty()) {
+            throw new BadRequestException("Missing or empty name");
+        }
+
+        if (!name.matches("^[a-zA-Z]+$")) {
+            throw new UnprocessableException("Invalid type");
+        }
+
+        String nameToLowerCase = name.trim().toLowerCase();
+
+        Optional<Profile> existingProfile = profileRepo.findByNameIgnoreCase(nameToLowerCase);
+
+        if (existingProfile.isPresent()) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("status", "success");
+            result.put("message", "Profile already exists");
+            result.put("data", toResponse(existingProfile.get()));
+            return result;
+        }
+
+        // Call all three APIs
+        Map<String, Object> genderData = clientCall.fetchGender(nameToLowerCase);
+        Map<String, Object> ageData = clientCall.fetchAge(nameToLowerCase);
+        Map<String, Object> nationalityData = clientCall.fetchNationality(nameToLowerCase);
+
+        // Build and save existingProfile
+        Profile profile = Profile.builder()
+                .name(name)
+                .gender((String) genderData.get("gender"))
+                .sampleSize((Integer) genderData.get("count"))
+                .genderProbability((Double) genderData.get("probability"))
+                .age((Integer) ageData.get("age"))
+                .countryId((String) nationalityData.get("country_id"))
+                .countryProbability((Double) nationalityData.get("probability"))
+                .ageGroup(classifyAge((Integer) ageData.get("age")))
+                .build();
+
+
+        // Pick highest probability country
+        List<Map<String, Object>> countries = (List<Map<String, Object>>) nationalityData.get("country");
+        Map<String, Object> topCountry = getTopCountry(countries);
+
+        profile.setCountryId((String) topCountry.get("country_id"));
+        profile.setCountryProbability((Double) topCountry.get("probability"));
+
+        profileRepo.save(profile);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", "success");
+        response.put("data", toResponse(profile));
+
+
+        return response;
+
+    }
+
+    private String classifyAge(int age) {
+        if (age <= 12) return "child";
+        if (age <= 19) return "teenager";
+        if (age <= 59) return "adult";
+        return "senior";
+    }
+
+    private Map<String, Object> getTopCountry(List<Map<String, Object>> countries) {
+        Map<String, Object> top = null;
+        double maxProb = -1;
+        for (Map<String, Object> country : countries) {
+            double prob = ((Number) country.get("probability")).doubleValue();
+            if (prob > maxProb) {
+                maxProb = prob;
+                top = country;
+            }
+        }
+        return top; // just return the map directly
+    }
+
+    private ProfileResponse toResponse(Profile profile) {
+        return ProfileResponse.builder()
+                .id(profile.getId())
+                .name(profile.getName())
+                .gender(profile.getGender())
+                .genderProbability(profile.getGenderProbability())
+                .age(profile.getAge())
+                .sampleSize(profile.getSampleSize())
+                .ageGroup(profile.getAgeGroup())
+                .countryId(profile.getCountryId())
+                .countryProbability(profile.getCountryProbability())
+                .createdAt(profile.getCreatedAt())
+                .build();
+
+    }
+
+
+    public ProfileResponse getProfile(String profileId) {
+        Optional<Profile> existingProfile = profileRepo.findById(profileId);
+
+        if (existingProfile.isPresent()) {
+            return toResponse(existingProfile.get());
+
+        }
+        throw new RuntimeException("Profile not found for profile id: " + profileId);
+    }
+
+
+    public List<ProfileSummary> getAllProfile(String gender, String countryId, String ageGroup) {
+        return null;
+    }
+
+
+    public void deleteProfile(String profileId) {
+        profileRepo.deleteById(profileId);
+    }
 }
