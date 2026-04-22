@@ -4,6 +4,7 @@ import com.devStephen.profiler_api.client.ExternalClientCall;
 import com.devStephen.profiler_api.dto.ProfileResponse;
 import com.devStephen.profiler_api.dto.ProfileSummary;
 import com.devStephen.profiler_api.exceptions.BadRequestException;
+import com.devStephen.profiler_api.exceptions.NotFoundException;
 import com.devStephen.profiler_api.exceptions.UnprocessableException;
 import com.devStephen.profiler_api.model.Profile;
 import com.devStephen.profiler_api.repository.ProfileRepo;
@@ -125,12 +126,39 @@ public class ProfileService {
             return toResponse(existingProfile.get());
 
         }
-        throw new RuntimeException("Profile not found for profile id: " + profileId);
+        throw new NotFoundException("Profile not found for profile id: " + profileId);
     }
 
 
     public List<ProfileSummary> getAllProfile(String gender, String countryId, String ageGroup) {
-        return null;
+
+    /*
+    Fetch all profiles from DB
+    Filter by gender, countryId, ageGroup only if they were passed — if not passed, ignore that filter
+    Convert each Profile to a ProfileSummary
+    Return the list
+     */
+
+        List<Profile> allProfiles = profileRepo.findAll();
+
+        return allProfiles.stream()
+                .filter(p -> gender == null || p.getGender().equalsIgnoreCase(gender))
+                .filter(p -> countryId == null || p.getCountryId().equalsIgnoreCase(countryId))
+                .filter(p -> ageGroup == null || p.getAgeGroup().equalsIgnoreCase(ageGroup))
+                .map(a -> toSummary(a))
+                .toList();
+
+    }
+
+    private ProfileSummary toSummary(Profile profile) {
+        return ProfileSummary.builder()
+                .id(profile.getId())
+                .name(profile.getName())
+                .gender(profile.getGender())
+                .age(profile.getAge())
+                .ageGroup(profile.getAgeGroup())
+                .countryId(profile.getCountryId())
+                .build();
     }
 
 

@@ -38,6 +38,7 @@ public class ProfileController {
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String country_id,
             @RequestParam(required = false) String age_group){
+
         List<ProfileSummary> profiles = profileService.getAllProfile(gender, country_id, age_group);
 
         Map<String, Object> response = new LinkedHashMap<>();
