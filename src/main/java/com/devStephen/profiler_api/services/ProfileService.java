@@ -11,10 +11,7 @@ import com.devStephen.profiler_api.repository.ProfileRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,25 +48,25 @@ public class ProfileService {
         Map<String, Object> ageData = clientCall.fetchAge(nameToLowerCase);
         Map<String, Object> nationalityData = clientCall.fetchNationality(nameToLowerCase);
 
-        // Build and save existingProfile
-        Profile profile = Profile.builder()
-                .name(name)
-                .gender((String) genderData.get("gender"))
-                .sampleSize((Integer) genderData.get("count"))
-                .genderProbability((Double) genderData.get("probability"))
-                .age((Integer) ageData.get("age"))
-                .countryId((String) nationalityData.get("country_id"))
-                .countryProbability((Double) nationalityData.get("probability"))
-                .ageGroup(classifyAge((Integer) ageData.get("age")))
-                .build();
-
 
         // Pick highest probability country
         List<Map<String, Object>> countries = (List<Map<String, Object>>) nationalityData.get("country");
         Map<String, Object> topCountry = getTopCountry(countries);
 
-        profile.setCountryId((String) topCountry.get("country_id"));
-        profile.setCountryProbability((Double) topCountry.get("probability"));
+        // Build and save profile
+        Profile profile = Profile.builder()
+                .name(nameToLowerCase)
+                .gender((String) genderData.get("gender"))
+                .sampleSize((Integer) genderData.get("count"))
+                .genderProbability((Double) genderData.get("probability"))
+                .age(((Number) ageData.get("age")).intValue())
+                .countryId((String) topCountry.get("country_id"))
+                .countryProbability((Double) nationalityData.get("probability"))
+                .ageGroup(classifyAge(((Number) ageData.get("age")).intValue()))
+                .build();
+
+//        profile.setCountryId((String) topCountry.get("country_id"));
+//        profile.setCountryProbability((Double) topCountry.get("probability"));
 
         profileRepo.save(profile);
 
@@ -119,7 +116,7 @@ public class ProfileService {
     }
 
 
-    public ProfileResponse getProfile(String profileId) {
+    public ProfileResponse getProfile(UUID profileId) {
         Optional<Profile> existingProfile = profileRepo.findById(profileId);
 
         if (existingProfile.isPresent()) {
@@ -152,7 +149,6 @@ public class ProfileService {
 
     private ProfileSummary toSummary(Profile profile) {
         return ProfileSummary.builder()
-                .id(profile.getId())
                 .name(profile.getName())
                 .gender(profile.getGender())
                 .age(profile.getAge())
@@ -162,7 +158,7 @@ public class ProfileService {
     }
 
 
-    public void deleteProfile(String profileId) {
+    public void deleteProfile(UUID profileId) {
         profileRepo.deleteById(profileId);
     }
 }

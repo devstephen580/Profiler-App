@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/profiles")
@@ -28,7 +29,7 @@ public class ProfileController {
     }
 
     @GetMapping("/{profileId}")
-    public ResponseEntity<?> getProfile ( @PathVariable String profileId){
+    public ResponseEntity<?> getProfile ( @PathVariable UUID profileId){
         ProfileResponse profile = profileService.getProfile(profileId);
         return ResponseEntity.ok(Map.of("status", "success", "data", profile));
     }
@@ -50,7 +51,7 @@ public class ProfileController {
     }
 
     @DeleteMapping("/{profileId}")
-    public ResponseEntity<Void> deleteProfile ( @PathVariable String profileId){
+    public ResponseEntity<Void> deleteProfile ( @PathVariable UUID profileId){
         profileService.deleteProfile(profileId);
         return ResponseEntity.noContent().build();
     }

@@ -1,5 +1,6 @@
 package com.devStephen.profiler_api.model;
 
+import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Builder
 @Entity
@@ -15,8 +17,20 @@ import java.time.Instant;
 @Data
 public class Profile {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
+
+    @PrePersist
+    public void prePersist(){
+        if (this.id == null) {
+            this.id = Generators.timeBasedEpochGenerator().generate();
+
+        }
+        this.createdAt = Instant.now();
+    }
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
 
     @Column(unique = true, nullable = false)
     private String name;
@@ -40,12 +54,5 @@ public class Profile {
     @Column(name = "country_probability")
     private Double countryProbability;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @PrePersist // Timezone aware, Yes — always UTC
-    public void prePersist() {
-        this.createdAt = Instant.now();
-    }
 
 }

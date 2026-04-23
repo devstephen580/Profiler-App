@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProfileResponse {
-    private String id;
+    private UUID id;
     private String name;
     private String gender;
     private Double genderProbability;

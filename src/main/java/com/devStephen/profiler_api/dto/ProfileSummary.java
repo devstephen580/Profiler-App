@@ -1,10 +1,14 @@
 package com.devStephen.profiler_api.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
+@Builder
 public class ProfileSummary {
-    private String id;
+    private UUID id;
     private String name;
     private String gender;
     private Integer age;
