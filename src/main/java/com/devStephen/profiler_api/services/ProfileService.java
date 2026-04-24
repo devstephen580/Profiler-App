@@ -60,8 +60,8 @@ public class ProfileService {
                 .sampleSize((Integer) genderData.get("count"))
                 .genderProbability((Double) genderData.get("probability"))
                 .age(((Number) ageData.get("age")).intValue())
-                .countryId((String) topCountry.get("country_id"))
-                .countryProbability((Double) nationalityData.get("probability"))
+                .countryId((String) topCountry.get("country_id")) 
+                .countryProbability((Double) topCountry.get("probability"))
                 .ageGroup(classifyAge(((Number) ageData.get("age")).intValue()))
                 .build();
 
