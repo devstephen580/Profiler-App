@@ -60,7 +60,7 @@ public class ProfileService {
                 .sampleSize((Integer) genderData.get("count"))
                 .genderProbability((Double) genderData.get("probability"))
                 .age(((Number) ageData.get("age")).intValue())
-                .countryId((String) topCountry.get("country_id")) 
+                .countryId((String) topCountry.get("country_id"))
                 .countryProbability((Double) topCountry.get("probability"))
                 .ageGroup(classifyAge(((Number) ageData.get("age")).intValue()))
                 .build();
@@ -139,10 +139,10 @@ public class ProfileService {
         List<Profile> allProfiles = profileRepo.findAll();
 
         return allProfiles.stream()
-                .filter(p -> gender == null || p.getGender().equalsIgnoreCase(gender))
-                .filter(p -> countryId == null || p.getCountryId().equalsIgnoreCase(countryId))
-                .filter(p -> ageGroup == null || p.getAgeGroup().equalsIgnoreCase(ageGroup))
-                .map(a -> toSummary(a))
+                .filter(p -> gender == null || (p.getGender() != null && p.getGender().equalsIgnoreCase(gender)))
+                .filter(p -> countryId == null || (p.getCountryId() != null && p.getCountryId().equalsIgnoreCase(countryId)))
+                .filter(p -> ageGroup == null || (p.getAgeGroup() != null && p.getAgeGroup().equalsIgnoreCase(ageGroup)))
+                .map(this::toSummary)
                 .toList();
 
     }
@@ -152,6 +152,7 @@ public class ProfileService {
                 .name(profile.getName())
                 .gender(profile.getGender())
                 .age(profile.getAge())
+                .id(profile.getId())
                 .ageGroup(profile.getAgeGroup())
                 .countryId(profile.getCountryId())
                 .build();

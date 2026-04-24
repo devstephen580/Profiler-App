@@ -37,10 +37,10 @@ public class ProfileController {
     @GetMapping("/all")
     public ResponseEntity<?> getAllProfile (
             @RequestParam(required = false) String gender,
-            @RequestParam(required = false) String country_id,
-            @RequestParam(required = false) String age_group){
+            @RequestParam(required = false) String countryId,
+            @RequestParam(required = false) String ageGroup){
 
-        List<ProfileSummary> profiles = profileService.getAllProfile(gender, country_id, age_group);
+        List<ProfileSummary> profiles = profileService.getAllProfile(gender, countryId, ageGroup);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", "success");
