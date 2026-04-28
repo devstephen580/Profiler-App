@@ -15,6 +15,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Table(name = "profile", indexes = {
+        @Index(name = "idx_gender", columnList = "gender"),
+        @Index(name = "idx_country_id", columnList = "country_id"),
+        @Index(name = "idx_age_group", columnList = "age_group"),
+        @Index(name = "idx_age", columnList = "age")})
 public class Profile {
     @Id
     private UUID id;
@@ -35,24 +40,26 @@ public class Profile {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @Column(name = "country_name", nullable = false)
+    private String countryName;
+
+    @Column(nullable = false)
     private String gender;
 
-    @Column(name = "gender_probability")
+    @Column(name = "gender_probability", nullable = false)
     private Double genderProbability;
 
-    @Column(name = "sample_size")
-    private Integer sampleSize;
-
+    @Column(nullable = false)
     private Integer age;
 
-    @Column(name = "age_group")
+    @Column(name = "age_group", nullable = false)
     private String ageGroup;
 
-    @Column(name = "country_id")
+    @Column(name = "country_id", length = 2, nullable = false)
     private String countryId;
 
     @Column(name = "country_probability")
     private Double countryProbability;
 
-
+// chore: update Profile entity schema, add indexes, and remove sample_size field
 }
