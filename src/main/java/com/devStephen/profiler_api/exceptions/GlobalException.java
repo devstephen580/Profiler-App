@@ -3,8 +3,10 @@ package com.devStephen.profiler_api.exceptions;
 import com.devStephen.profiler_api.dto.ApiResponse;
 import com.devStephen.profiler_api.dto.ProfileResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalException {
@@ -49,6 +51,26 @@ public class GlobalException {
                 )
         );
     }
+
+  // ── Handles @Valid failures on request body ──────────────────────
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse<Object>> handleValidation(MethodArgumentNotValidException ex) {
+    String message = ex.getBindingResult().getFieldErrors().stream()
+        .map(err -> err.getField() + ": " + err.getDefaultMessage())
+        .findFirst()
+        .orElse("Invalid request body");
+    return ResponseEntity.status(400).body(
+        new ApiResponse<>("error", message, null)
+    );
+  }
+
+  // ── Handles wrong type for @RequestParam (e.g. letters for an int) ──
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiResponse<Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+    return ResponseEntity.status(400).body(
+        new ApiResponse<>("error", "Invalid query parameters, enter the correct query", null)
+    );
+  }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneric(Exception ex) {

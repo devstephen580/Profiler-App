@@ -138,10 +138,11 @@ public class ProfileService {
 
         List<Profile> allProfiles = profileRepo.findAll();
 
+
         return allProfiles.stream()
-                .filter(p -> gender == null || (p.getGender() != null && p.getGender().equalsIgnoreCase(gender)))
-                .filter(p -> countryId == null || (p.getCountryId() != null && p.getCountryId().equalsIgnoreCase(countryId)))
-                .filter(p -> ageGroup == null || (p.getAgeGroup() != null && p.getAgeGroup().equalsIgnoreCase(ageGroup)))
+                .filter(p -> gender == null || p.getGender().equalsIgnoreCase(gender))
+                .filter(p -> countryId == null || p.getCountryId().equalsIgnoreCase(countryId))
+                .filter(p -> ageGroup == null || p.getAgeGroup().equalsIgnoreCase(ageGroup))
                 .map(this::toSummary)
                 .toList();
 
@@ -150,9 +151,9 @@ public class ProfileService {
     private ProfileSummary toSummary(Profile profile) {
         return ProfileSummary.builder()
                 .name(profile.getName())
+                .id(profile.getId())
                 .gender(profile.getGender())
                 .age(profile.getAge())
-                .id(profile.getId())
                 .ageGroup(profile.getAgeGroup())
                 .countryId(profile.getCountryId())
                 .build();
