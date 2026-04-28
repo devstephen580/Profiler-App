@@ -14,4 +14,5 @@ public class ProfileSummary {
     private Integer age;
     private String ageGroup;
     private String countryId;
+    private String countryName;
 }

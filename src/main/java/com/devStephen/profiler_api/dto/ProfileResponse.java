@@ -13,14 +13,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProfileResponse {
-    private UUID id;
-    private String name;
-    private String gender;
-    private Double genderProbability;
-    private Integer sampleSize;
-    private Integer age;
-    private String ageGroup;
-    private String countryId;
-    private Double countryProbability;
-    private Instant createdAt;
+  private UUID id;
+  private String name;
+  private String gender;
+  private Double genderProbability;
+  private Integer age;
+  private String ageGroup;
+  private String countryId;
+  private String countryName;
+  private Double countryProbability;
+  private Instant createdAt;
 }
